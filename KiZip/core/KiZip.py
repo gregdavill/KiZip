@@ -95,20 +95,15 @@ def main(parser, config, logger):
 
     file_list = parser.parse()
 
+    # debug
     print(file_list)
     
+    zip_output_file = os.path.join(pcb_file_dir, pcb_file_name + '.zip')
     #zip up all files
-    zf = zipfile.ZipFile(os.path.join(pcb_file_dir,pcb_file_name + '.zip'), "w", zipfile.ZIP_DEFLATED)
-    abs_src = os.path.abspath(parser.output_folder)
-    for filename in  file_list:
-            absname = os.path.abspath(filename)
-            arcname = absname[len(abs_src) + 1:]
-            print('zipping %s as %s' % (filename,
-                                        arcname))
-            zf.write(absname, arcname)
-    zf.close()
-    # We have just generated your plotfiles with a single script
-
+    with zipfile.ZipFile(zip_output_file, "w", zipfile.ZIP_DEFLATED) as zf:
+        for filename in  file_list:
+            zf.write(filename=os.path.abspath(filename), arcname=os.path.basename(filename))
+        
 
 
 
