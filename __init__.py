@@ -1,0 +1,1 @@
+from .KiZip import plugin
