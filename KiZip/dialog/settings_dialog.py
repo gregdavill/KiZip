@@ -41,7 +41,8 @@ class SettingsDialogPanel(dialog_base.SettingsDialogPanel):
                  file_name_format_hint):
         self.config_save_func = config_save_func
         dialog_base.SettingsDialogPanel.__init__(self, parent)
-     
+        self.general = GeneralSettingsPanel(self.notebook,file_name_format_hint)
+        self.notebook.AddPage(self.general, "General")
         
     def OnExit(self, event):
         self.GetParent().EndModal(wx.ID_CANCEL)
@@ -55,3 +56,13 @@ class SettingsDialogPanel(dialog_base.SettingsDialogPanel):
     def finish_init(self):
         self.html.OnBoardRotationSlider(None)
 
+# Implementing GeneralSettingsPanelBase
+class GeneralSettingsPanel(dialog_base.GeneralSettingsPanelBase):
+
+    def __init__(self, parent, file_name_format_hint):
+        dialog_base.GeneralSettingsPanelBase.__init__(self, parent)
+        self.file_name_format_hint = file_name_format_hint
+
+    def OnNameFormatHintClick(self, event):
+        wx.MessageBox(self.file_name_format_hint, 'File name format help',
+                      style=wx.ICON_NONE | wx.OK)

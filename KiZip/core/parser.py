@@ -19,13 +19,43 @@ class Parser(object):
         self.config = config
         self.logger = logger
         self.output_folder = None
+        self.temp_folder = None
         self.generated_files = []
 
         self.board = board
         if self.board is None:
             self.board = pcbnew.LoadBoard(self.file_name)  # type: pcbnew.BOARD
 
+    def __del__(self):
+        if self.temp_folder is not None:
+            self.temp_folder.cleanup()
+
     def parse(self):
+        title_block = self.board.GetTitleBlock()
+        file_date = title_block.GetDate()
+        if not file_date:
+            file_mtime = os.path.getmtime(self.file_name)
+            file_date = datetime.fromtimestamp(file_mtime).strftime(
+                    '%Y-%m-%d %H:%M:%S')
+        title = title_block.GetTitle()
+        pcb_file_name = os.path.basename(self.file_name)
+        if not title:
+            # remove .kicad_pcb extension
+            title = os.path.splitext(pcb_file_name)[0]
+
+        pcbdata = {
+            "metadata": {
+                "title": title,
+                "revision": title_block.GetRevision(),
+                "company": title_block.GetCompany(),
+                "date": file_date,
+            },
+        }
+
+        return pcbdata
+
+    def plot(self):
+
         plot_plan = [
             ( "CuTop", F_Cu, "Top layer", ".gtl"),
             ( "CuBottom", B_Cu, "Bottom layer", ".gbl"),
@@ -38,7 +68,8 @@ class Parser(object):
             ( "EdgeCuts", Edge_Cuts, "Edges", ".gko"),
         ]
 
-        self.output_folder = tempfile.TemporaryDirectory(prefix="kizip").name
+        self.temp_folder = tempfile.TemporaryDirectory(prefix="kizip")
+        self.output_folder = self.temp_folder.name
 
         # Default
         pctl = PLOT_CONTROLLER(self.board)
@@ -131,9 +162,3 @@ class Parser(object):
         self.generated_files += [drlPlot]
 
         return self.generated_files
-
-    def cleanup(self):
-        if self.output_folder is not None:
-            for f in self.generated_files:
-                os.remove(f)
-            os.rmdir(self.output_folder)

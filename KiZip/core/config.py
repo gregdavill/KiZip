@@ -19,8 +19,8 @@ class Config:
         '    %r : revision from pcb metadata.\n'
         '    %d : pcb date from metadata if available, '
         'file modification date otherwise.\n'
-        '    %D : bom generation date.\n'
-        '    %T : bom generation time.\n'
+        '    %D : gerber generation date.\n'
+        '    %T : gerber generation time.\n'
         '\n'
         'Extension will be added automatically.'
     )  # type: str
@@ -29,7 +29,11 @@ class Config:
     config_file = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
 
     # Defaults
-
+    
+    # General 
+    output_dest_dir = 'Production/'  # This is relative to pcb file directory
+    output_name_format = '%f_gerber_%D_%T'
+    
 
     @staticmethod
     def _split(s):
@@ -40,40 +44,67 @@ class Config:
     def _join(lst):
         return ','.join([s.replace(',', '\\,') for s in lst])
 
-    def __init__(self, version):
+    def __init__(self, version, rel_directory):
         self.version = version
+        self.rel_directory = rel_directory
 
     def load_from_ini(self):
         """Init from config file if it exists."""
         if not os.path.isfile(self.config_file):
             return
         f = FileConfig(localFilename=self.config_file)
+        f.SetPath('/general')
+        self.output_dest_dir = f.Read('output_dest_dir', self.output_dest_dir)
+        self.output_name_format = f.Read('output_name_format', self.output_name_format)
 
 
     def save(self):
         f = FileConfig(localFilename=self.config_file)
 
+        f.SetPath('/general')
+        output_dest_dir = self.output_dest_dir
+        if output_dest_dir.startswith(self.rel_directory):
+            output_dest_dir = os.path.relpath(
+                    output_dest_dir, self.rel_directory)
+        f.Write('output_dest_dir', output_dest_dir)
+        f.Write('output_name_format', self.output_name_format)
         
         f.Flush()
 
     def set_from_dialog(self, dlg):
         # type: (dialog.settings_dialog.SettingsDialogPanel) -> None
-        ...
+        
+        # General
+        self.output_dest_dir = dlg.general.outputDirPicker.Path
+        self.output_name_format = dlg.general.fileNameFormatTextControl.Value
 
     def transfer_to_dialog(self, dlg):
         # type: (dialog.settings_dialog.SettingsDialogPanel) -> None
-        ...
+
+        # General
+        import os.path
+        if os.path.isabs(self.output_dest_dir):
+            dlg.general.outputDirPicker.Path = self.output_dest_dir
+        else:
+            dlg.general.outputDirPicker.Path = os.path.join(
+                    self.rel_directory, self.output_dest_dir)
+        dlg.general.fileNameFormatTextControl.Value = self.output_name_format
 
     # noinspection PyTypeChecker
     def add_options(self, parser, file_name_format_hint):
-        ...
+        
+        # General
+        parser.add_argument('--dest-dir', default=self.output_dest_dir,
+                            help='Destination directory for output file '
+                                 'relative to pcb file directory.')
+        parser.add_argument('--name-format', default=self.output_name_format,
+                            help=file_name_format_hint.replace('%', '%%'))
 
     def set_from_args(self, args):
         # type: (argparse.Namespace) -> None
         import math
 
+        # General
+        self.output_dest_dir = args.dest_dir
+        self.output_name_format = args.name_format
 
-    def get_html_config(self):
-        import json
-        d = {f: getattr(self, f) for f in self.html_config_fields}
-        return json.dumps(d)

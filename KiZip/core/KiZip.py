@@ -1,4 +1,6 @@
 import os
+import json
+import re
 import sys
 from datetime import datetime
 import logging
@@ -50,6 +52,20 @@ class Logger(object):
 log = None  # type: Logger or None
 
 
+def process_substitutions(output_name_format, pcb_file_name, metadata):
+    # type: (str, str, dict)->str
+    name = output_name_format.replace('%f', os.path.splitext(pcb_file_name)[0])
+    name = name.replace('%p', metadata['title'])
+    name = name.replace('%c', metadata['company'])
+    name = name.replace('%r', metadata['revision'])
+    name = name.replace('%d', metadata['date'].replace(':', '-'))
+    now = datetime.now()
+    name = name.replace('%D', now.strftime('%Y-%m-%d'))
+    name = name.replace('%T', now.strftime('%H-%M-%S'))
+    # sanitize the name to avoid characters illegal in file systems
+    name = name.replace('\\', '/')
+    name = re.sub(r'[?%*:|"<>]', '_', name)
+    return name + '.zip'
 
 class KiZipPlugin(pcbnew.ActionPlugin, object):
 
@@ -70,9 +86,9 @@ class KiZipPlugin(pcbnew.ActionPlugin, object):
         from ..version import version
         from ..errors import ParsingException
         self.version = version
-        config = Config(self.version)
         board = pcbnew.GetBoard()
         pcb_file_name = board.GetFileName()
+        config = Config(self.version, os.path.dirname(pcb_file_name))
 
         logger = Logger()
         if not pcb_file_name:
@@ -93,14 +109,28 @@ def main(parser, config, logger):
     pcb_file_name = os.path.basename(parser.file_name)
     pcb_file_dir = os.path.dirname(parser.file_name)
 
-    file_list = parser.parse()
+    
+    pcbdata = parser.parse()
+
+    file_list = parser.plot()
+
 
     # debug
     print(file_list)
     
-    zip_output_file = os.path.join(pcb_file_dir, pcb_file_name + '.zip')
+
+    if os.path.isabs(config.output_dest_dir):
+        output_file_dir = config.output_dest_dir
+    else:
+        output_file_dir = os.path.join(pcb_file_dir, config.output_dest_dir)
+
+    output_file_name = process_substitutions(
+            config.output_name_format, pcb_file_name, pcbdata['metadata'])
+    output_file_name = os.path.join(output_file_dir, output_file_name)
+    os.makedirs(output_file_dir, exist_ok=True)
+
     #zip up all files
-    with zipfile.ZipFile(zip_output_file, "w", zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(output_file_name, "w", zipfile.ZIP_DEFLATED) as zf:
         for filename in  file_list:
             zf.write(filename=os.path.abspath(filename), arcname=os.path.basename(filename))
         
