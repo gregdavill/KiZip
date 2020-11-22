@@ -12,6 +12,8 @@ from pcbnew import *
 from datetime import datetime
 from shutil import move
 
+from .layers import GerberLayer, DrillLayer
+
 class Parser(object):
 
     def __init__(self, file_name, config, logger, board=None):
@@ -90,23 +92,6 @@ class Parser(object):
         popt.SetMirror(False)
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
-        layers_to_plot = [e for e in self.config.layers if e.enabled]
-
-        # Create files and keep track of names
-        for layer in layers_to_plot:
-            pctl.SetLayer(layer.id)
-            pctl.OpenPlotfile(layer.id, PLOT_FORMAT_GERBER, layer.name)
-            pctl.PlotLayer()
-            pctl.ClosePlot()
-            
-            # rename
-            srcPlot = pctl.GetPlotFileName()
-            new_name = os.path.splitext(os.path.basename(self.file_name))[0] + layer.ext
-            new_name = os.path.join(os.path.dirname(srcPlot),new_name)
-            move(srcPlot, new_name)
-
-            self.generated_files += [new_name]
-
         # Fabricators need drill files.
         # sometimes a drill map file is asked (for verification purpose)
         drlwriter = EXCELLON_WRITER( self.board )
@@ -131,14 +116,47 @@ class Parser(object):
 
         genDrl = True
         genMap = True
-        drlwriter.CreateDrillandMapFilesSet( self.output_folder, genDrl, genMap );
+        drlwriter.CreateDrillandMapFilesSet( self.output_folder, genDrl, genMap )
 
-        project_name = os.path.splitext(os.path.split(self.file_name)[1])[0]
 
-        drlPlot = os.path.join(self.output_folder,project_name + '-PTH.drl')
-        self.generated_files += [drlPlot]
-        
-        drlPlot = os.path.join(self.output_folder,project_name + '-NPTH.drl')
-        self.generated_files += [drlPlot]
+
+
+        layers_to_plot = [e for e in self.config.layers if e.enabled]
+
+        # Create files and keep track of names
+        for layer in layers_to_plot:
+            # gerber layers
+            if isinstance(layer, GerberLayer):
+                pctl.SetLayer(layer.id)
+                pctl.OpenPlotfile(layer.id, PLOT_FORMAT_GERBER, layer.name)
+                pctl.PlotLayer()
+                pctl.ClosePlot()
+                
+                # rename
+                srcPlot = pctl.GetPlotFileName()
+                new_name = os.path.splitext(os.path.basename(self.file_name))[0] + layer.ext
+                new_name = os.path.join(os.path.dirname(srcPlot),new_name)
+                move(srcPlot, new_name)
+
+                self.generated_files += [new_name]
+
+            # drill layers
+            if isinstance(layer, DrillLayer):
+                project_name = os.path.splitext(os.path.split(self.file_name)[1])[0]
+
+                drlPlot = os.path.join(self.output_folder,project_name + '-PTH.drl')
+                
+                new_name = os.path.splitext(os.path.basename(self.file_name))[0] + '-PTH' + layer.ext
+                new_name = os.path.join(os.path.dirname(drlPlot),new_name)
+                move(drlPlot, new_name)
+
+                self.generated_files += [new_name]
+                
+                drlPlot = os.path.join(self.output_folder,project_name + '-NPTH.drl')
+                new_name = os.path.splitext(os.path.basename(self.file_name))[0] + '-NPTH' + layer.ext
+                new_name = os.path.join(os.path.dirname(drlPlot),new_name)
+                move(drlPlot, new_name)
+
+                self.generated_files += [new_name]
 
         return self.generated_files

@@ -113,10 +113,7 @@ def main(parser, config, logger):
     pcbdata = parser.parse()
 
     file_list = parser.plot()
-
-
-    # debug
-    print(file_list)
+    logger.info(file_list)
     
 
     if os.path.isabs(config.output_dest_dir):

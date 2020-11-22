@@ -64,4 +64,5 @@ default_layers = [
     GerberLayer(pcbnew.B_CrtYd  ,'Back CourtYard', ''),
     GerberLayer(pcbnew.F_Fab    ,'Top Fab', ''),
     GerberLayer(pcbnew.B_Fab    ,'Back Fab', ''),
+    DrillLayer( 9000, 'Drills', '.txt', enabled=True)
 ]
