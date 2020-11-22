@@ -1,7 +1,10 @@
-# Automated gerber packaging plugin for KiCad
+# 2-click gerber/drill export plugin for KiCad
 ![icon](icons/zip.png)
 
-This plugin takes the repetitive task of packaging up gerbers and other production files into zip and automates it to a few button clicks.
+This Action plugin makes the task of exporting and zipping up gerbers and drill files for PCB manufactures, quick and easy. With just two clicks from the pcbnew window.
+
+This plugin aims to be simple to install and use. Due to current limitation with the KiCad scripting engine it only covers gerber/drill files. 
+For a more advanced plugin check out [KiBot](https://github.com/INTI-CMNB/KiBot)
 
 
 ## Licence and credits
