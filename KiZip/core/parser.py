@@ -50,23 +50,12 @@ class Parser(object):
                 "company": title_block.GetCompany(),
                 "date": file_date,
             },
+            "layer_count": self.board.GetCopperLayerCount(),
         }
 
         return pcbdata
 
     def plot(self):
-
-        plot_plan = [
-            ( "CuTop", F_Cu, "Top layer", ".gtl"),
-            ( "CuBottom", B_Cu, "Bottom layer", ".gbl"),
-            ( "MaskBottom", B_Mask, "Mask Bottom", ".gbs"),
-            ( "MaskTop", F_Mask, "Mask top", ".gts"),
-            ( "PasteBottom", B_Paste, "Paste Bottom", ".gbp"),
-            ( "PasteTop", F_Paste, "Paste Top", ".gtp"),
-            ( "SilkTop", F_SilkS, "Silk Top", ".gto"),
-            ( "SilkBottom", B_SilkS, "Silk Bottom", ".gbo"),
-            ( "EdgeCuts", Edge_Cuts, "Edges", ".gko"),
-        ]
 
         self.temp_folder = tempfile.TemporaryDirectory(prefix="kizip")
         self.output_folder = self.temp_folder.name
@@ -101,25 +90,12 @@ class Parser(object):
         popt.SetMirror(False)
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
+        layers_to_plot = [e for e in self.config.layers if e['enabled']]
+        
         # Create files and keep track of names
-        for layer_info in plot_plan:
-            pctl.SetLayer(layer_info[1])
-            pctl.OpenPlotfile(layer_info[0], PLOT_FORMAT_GERBER, layer_info[2])
-            pctl.PlotLayer()
-            time.sleep(0.01)
-            pctl.ClosePlot()
-            # Create a copy with same filename and Protel extensions.
-            srcPlot = pctl.GetPlotFileName()
-            self.generated_files += [srcPlot]
-
-
-        #generate internal copper layers, if any
-        lyrcnt = self.board.GetCopperLayerCount();
-
-        for innerlyr in range ( 1, lyrcnt-1 ):
-            pctl.SetLayer(innerlyr)
-            lyrname = 'inner%s' % innerlyr
-            pctl.OpenPlotfile(lyrname, PLOT_FORMAT_GERBER, "inner")
+        for layer in layers_to_plot:
+            pctl.SetLayer(getattr(pcbnew,layer['layer']))
+            pctl.OpenPlotfile(layer['layer'], PLOT_FORMAT_GERBER, '')
             pctl.PlotLayer()
             time.sleep(0.01)
             pctl.ClosePlot()

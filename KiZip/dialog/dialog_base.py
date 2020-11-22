@@ -151,3 +151,132 @@ class GeneralSettingsPanelBase ( wx.Panel ):
         event.Skip()
 
 
+###########################################################################
+## Class LayerSettingsPanelBase
+###########################################################################
+
+class LayerSettingsPanelBase ( wx.Panel ):
+
+    def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
+        wx.Panel.__init__ ( self, parent, id = id, pos = pos, size = size, style = style, name = name )
+
+        bSizer25 = wx.BoxSizer( wx.VERTICAL )
+
+        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Layer Settings" ), wx.VERTICAL )
+
+        SizerList = wx.BoxSizer( wx.VERTICAL )
+
+        self.LayerList = wx.ListCtrl( sbSizer11.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
+        SizerList.Add( self.LayerList, 1, wx.ALL|wx.EXPAND, 5 )
+
+        bSizer27 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.m_staticText7 = wx.StaticText( sbSizer11.GetStaticBox(), wx.ID_ANY, u"Note:\nInner Layers only generated if present", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7.Wrap( -1 )
+
+        bSizer27.Add( self.m_staticText7, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button17 = wx.Button( sbSizer11.GetStaticBox(), wx.ID_ANY, u"Edit Layer", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer27.Add( self.m_button17, 0, wx.ALL, 5 )
+
+
+        SizerList.Add( bSizer27, 0, wx.ALL|wx.EXPAND, 5 )
+
+
+        sbSizer11.Add( SizerList, 1, wx.EXPAND, 5 )
+
+
+        bSizer25.Add( sbSizer11, 1, wx.ALL|wx.EXPAND, 5 )
+
+
+        self.SetSizer( bSizer25 )
+        self.Layout()
+
+        # Connect Events
+        self.LayerList.Bind( wx.EVT_LEFT_DOWN, self.OnLeftDown )
+        self.m_button17.Bind( wx.EVT_BUTTON, self.OnEditLayer )
+
+    def __del__( self ):
+        pass
+
+
+    # Virtual event handlers, overide them in your derived class
+    def OnLeftDown( self, event ):
+        event.Skip()
+
+    def OnEditLayer( self, event ):
+        event.Skip()
+
+
+###########################################################################
+## Class AddLayerDialog
+###########################################################################
+
+class AddLayerDialog ( wx.Dialog ):
+
+    def __init__( self, parent ):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Add Layer", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+
+        self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+
+        bSizer28 = wx.BoxSizer( wx.VERTICAL )
+
+        fgSizer3 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer3.AddGrowableCol( 1 )
+        fgSizer3.SetFlexibleDirection( wx.BOTH )
+        fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.m_staticText12 = wx.StaticText( self, wx.ID_ANY, u"Layer", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText12.Wrap( -1 )
+
+        fgSizer3.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.LayerName = wx.StaticText( self, wx.ID_ANY, u"<Layer>", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.LayerName.Wrap( -1 )
+
+        fgSizer3.Add( self.LayerName, 0, wx.ALL, 5 )
+
+        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"var0", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText13.Wrap( -1 )
+
+        fgSizer3.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer3.Add( self.m_textCtrl4, 0, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, u"var1", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText14.Wrap( -1 )
+
+        fgSizer3.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_textCtrl5 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer3.Add( self.m_textCtrl5, 0, wx.ALL|wx.EXPAND, 5 )
+
+
+        bSizer28.Add( fgSizer3, 0, wx.ALL|wx.EXPAND, 5 )
+
+        self.m_staticline1 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        bSizer28.Add( self.m_staticline1, 0, wx.EXPAND |wx.ALL, 5 )
+
+        bSizer29 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.m_button21 = wx.Button( self, wx.ID_OK, u"Confirm", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer29.Add( self.m_button21, 0, wx.ALL, 5 )
+
+        self.m_button20 = wx.Button( self, wx.ID_CANCEL, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer29.Add( self.m_button20, 0, wx.ALL, 5 )
+
+
+        bSizer28.Add( bSizer29, 1, wx.EXPAND, 5 )
+
+
+        self.SetSizer( bSizer28 )
+        self.Layout()
+        bSizer28.Fit( self )
+
+        self.Centre( wx.BOTH )
+
+    def __del__( self ):
+        pass
+
+

@@ -5,8 +5,10 @@ import os
 import re
 
 from wx import FileConfig
+import wx
 
 from .. import dialog
+from .kicad import layer_names, layers_default
 
 
 class Config:
@@ -25,6 +27,8 @@ class Config:
         'Extension will be added automatically.'
     )  # type: str
 
+    LAYER_NAMES = layer_names # type: list
+
     # Helper constants
     config_file = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
 
@@ -33,6 +37,9 @@ class Config:
     # General 
     output_dest_dir = 'Production/'  # This is relative to pcb file directory
     output_name_format = '%f_gerber_%D_%T'
+
+    # Layers
+    layers = [{'layer':l, 'ext':'', 'enabled': (l in layers_default)} for l in LAYER_NAMES]
     
 
     @staticmethod
@@ -58,6 +65,13 @@ class Config:
         self.output_name_format = f.Read('output_name_format', self.output_name_format)
 
 
+        f.SetPath("/layers")
+        for index in range(len(self.layers)):
+            d = self.layers[index]
+            d['enabled'] = f.ReadBool(f'{d["layer"]}_enabled', d['enabled'])
+        
+
+
     def save(self):
         f = FileConfig(localFilename=self.config_file)
 
@@ -68,6 +82,11 @@ class Config:
                     output_dest_dir, self.rel_directory)
         f.Write('output_dest_dir', output_dest_dir)
         f.Write('output_name_format', self.output_name_format)
+
+        f.SetPath("/layers")
+        for index in range(len(self.layers)):
+            d = self.layers[index]
+            f.WriteBool(f'{d["layer"]}_enabled',d['enabled'])
         
         f.Flush()
 
@@ -77,6 +96,20 @@ class Config:
         # General
         self.output_dest_dir = dlg.general.outputDirPicker.Path
         self.output_name_format = dlg.general.fileNameFormatTextControl.Value
+
+        # Layers
+        for index in range(len(self.layers)):
+            layer = self.layers[index]
+
+            #item.SetText(layer['layer'])
+            #dlg.layers.LayerList.InsertItem(item)
+            #dlg.layers.LayerList.SetItem(index,0,layer['layer'])
+            #dlg.layers.LayerList.SetItem(index,1,layer['ext'])
+
+            if index in dlg.layers.selected:
+                layer['enabled'] = True
+            else:
+                layer['enabled'] = False
 
     def transfer_to_dialog(self, dlg):
         # type: (dialog.settings_dialog.SettingsDialogPanel) -> None
@@ -90,9 +123,31 @@ class Config:
                     self.rel_directory, self.output_dest_dir)
         dlg.general.fileNameFormatTextControl.Value = self.output_name_format
 
+        # Layers
+        for index in range(len(self.layers)):
+            layer = self.layers[index]
+
+            item = wx.ListItem()
+            item.SetId(index)
+
+            item.SetText(layer['layer'])
+            dlg.layers.LayerList.InsertItem(item)
+            dlg.layers.LayerList.SetItem(index,0,layer['layer'])
+            dlg.layers.LayerList.SetItem(index,1,layer['ext'])
+
+            if layer['enabled']:
+                dlg.layers.selected.append(index)
+
+        dlg.layers.UpdateListSelections()
+
+
     # noinspection PyTypeChecker
     def add_options(self, parser, file_name_format_hint):
-        
+        # type: (argparse.ArgumentParser, str) -> None
+        parser.add_argument('--show-dialog', action='store_true',
+                            help='Shows config dialog. All other flags '
+                                 'will be ignored.')
+
         # General
         parser.add_argument('--dest-dir', default=self.output_dest_dir,
                             help='Destination directory for output file '
