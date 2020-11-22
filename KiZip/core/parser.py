@@ -91,7 +91,7 @@ class Parser(object):
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
         layers_to_plot = [e for e in self.config.layers if e.enabled]
-        
+
         # Create files and keep track of names
         for layer in layers_to_plot:
             pctl.SetLayer(layer.id)

@@ -81,11 +81,15 @@ class LayerSettingsPanel(dialog_base.LayerSettingsPanelBase):
         self.LayerPanelArea.SetSizer(self.bSizer)
 
         
-    def AddLayer(self, enabled, name, ext):
-        # Create wx element and add to scroll box
-        pnl = LayerItemPanelBase(self.LayerPanelArea, enabled, name, ext)
-        self.bSizer.Add(pnl, 0, wx.EXPAND, 5 )
-        self.layers += [pnl]
+    def AddLayer(self, l):
+        array = [p for p,lyr in list(self.layers) if lyr == l]
+        pnl = next(array) if len(array) > 0 else None
+
+        if pnl is None:
+            # Create wx element and add to scroll box
+            pnl = LayerItemPanelBase(self.LayerPanelArea, l.enabled, l.name, l.ext)
+            self.bSizer.Add(pnl, 0, wx.EXPAND, 5 )
+            self.layers += [(pnl, l)]
 
 
 # Implementing LayerSettingsPanelBase

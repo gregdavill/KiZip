@@ -11,15 +11,9 @@ from wx import FileConfig
 import wx
 
 from .. import dialog
-from .kicad import layer_names, layers_default
+from .layers import default_layers
 
 
-class Layer:
-    def __init__(self, id, name, ext, enabled=False):
-        self.enabled = enabled
-        self.name = name
-        self.id = id
-        self.ext = ext
 
 class Config:
     FILE_NAME_FORMAT_HINT = (
@@ -37,8 +31,6 @@ class Config:
         'Extension will be added automatically.'
     )  # type: str
 
-    LAYER_NAMES = layer_names # type: list
-
     # Helper constants
     config_file = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
 
@@ -49,23 +41,7 @@ class Config:
     output_name_format = '%f_gerber_%D_%T'
 
     # Layers
-    _default_layers = [
-        ( pcbnew.F_Cu, "Top layer", ".gtl"),
-        ( pcbnew.In1_Cu, "Inner Layer 1", ".g1"),
-        ( pcbnew.In2_Cu, "Inner Layer 2", ".g2"),
-        ( pcbnew.In3_Cu, "Inner Layer 3", ".g3"),
-        ( pcbnew.In4_Cu, "Inner Layer 4", ".g4"),
-        ( pcbnew.In5_Cu, "Inner Layer 5", ".g5"),
-        ( pcbnew.B_Cu, "Bottom layer", ".gbl"),
-        ( pcbnew.B_Mask, "Mask Bottom", ".gbs"),
-        ( pcbnew.F_Mask, "Mask top", ".gts"),
-        ( pcbnew.B_Paste, "Paste Bottom", ".gbp"),
-        ( pcbnew.F_Paste, "Paste Top", ".gtp"),
-        ( pcbnew.F_SilkS, "Silk Top", ".gto"),
-        ( pcbnew.B_SilkS, "Silk Bottom", ".gbo"),
-        ( pcbnew.Edge_Cuts, "Edges", ".gko"),
-    ]
-    layers = [Layer(*i, enabled=True) for i in _default_layers]
+    layers =  default_layers
 
     @staticmethod
     def _split(s):
@@ -128,7 +104,7 @@ class Config:
         for index in range(len(self.layers)):
             layer = self.layers[index]
 
-            pnl = next(l for l in dlg.layers.layers if l.name is layer.name)
+            pnl = next(pnl for pnl,lyr in dlg.layers.layers if lyr.name is layer.name)
             if pnl is not None:
                 layer.enabled = pnl.IsEnabled()
                 layer.ext = pnl.GetExtension()
@@ -148,7 +124,7 @@ class Config:
 
         # Layers
         for l in self.layers:
-            dlg.layers.AddLayer(l.enabled, l.name, l.ext)
+            dlg.layers.AddLayer(l)
 
 
     # noinspection PyTypeChecker

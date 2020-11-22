@@ -186,13 +186,13 @@ class LayerSettingsPanelBase ( wx.Panel ):
         bSizer12.Add( bSizer13, 0, wx.EXPAND, 5 )
 
         self.LayerPanelArea = wx.Panel( self.m_scrolledWindow1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        bSizer12.Add( self.LayerPanelArea, 1, wx.EXPAND |wx.ALL, 5 )
+        bSizer12.Add( self.LayerPanelArea, 1, wx.ALL|wx.EXPAND, 5 )
 
 
         self.m_scrolledWindow1.SetSizer( bSizer12 )
         self.m_scrolledWindow1.Layout()
         bSizer12.Fit( self.m_scrolledWindow1 )
-        SizerList.Add( self.m_scrolledWindow1, 1, wx.EXPAND |wx.ALL, 5 )
+        SizerList.Add( self.m_scrolledWindow1, 1, wx.ALL|wx.EXPAND, 5 )
 
 
         sbSizer11.Add( SizerList, 1, wx.EXPAND, 5 )
@@ -219,7 +219,7 @@ class LayerItemPanelBase ( wx.Panel ):
 
         bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.LayerEnabledCheckbox = wx.CheckBox( self, wx.ID_ANY, u"<Layer Name>", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.LayerEnabledCheckbox = wx.CheckBox( self, wx.ID_ANY, u"<Back SolderMask>", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer11.Add( self.LayerEnabledCheckbox, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 5 )
 
         self.Extension = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
