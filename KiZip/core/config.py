@@ -44,7 +44,7 @@ class Config:
     def _join(lst):
         return ','.join([s.replace(',', '\\,') for s in lst])
 
-    def __init__(self, version, rel_directory):
+    def __init__(self, version, rel_directory=None):
         self.version = version
         self.rel_directory = rel_directory
 

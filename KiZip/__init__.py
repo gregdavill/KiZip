@@ -42,15 +42,15 @@ def check_for_bom_button():
             top_tb.Bind(wx.EVT_TOOL, callback, id=button_wx_item_id)
             top_tb.Realize()
 
+if not os.environ.get('KIZIP_BOM_CLI_MODE', False):
+    from .core.KiZip import KiZipPlugin
 
-from .core.KiZip import KiZipPlugin
+    plugin = KiZipPlugin()
+    plugin.register()
 
-plugin = KiZipPlugin()
-plugin.register()
-
-# Add a button the hacky way if plugin button is not supported
-# in pcbnew, unless this is linux.
-if not plugin.pcbnew_icon_support and not sys.platform.startswith('linux'):
-    t = threading.Thread(target=check_for_bom_button)
-    t.daemon = True
-    t.start()
+    # Add a button the hacky way if plugin button is not supported
+    # in pcbnew, unless this is linux.
+    if not plugin.pcbnew_icon_support and not sys.platform.startswith('linux'):
+        t = threading.Thread(target=check_for_bom_button)
+        t.daemon = True
+        t.start()
