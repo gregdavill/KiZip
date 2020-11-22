@@ -166,21 +166,33 @@ class LayerSettingsPanelBase ( wx.Panel ):
 
         SizerList = wx.BoxSizer( wx.VERTICAL )
 
-        self.LayerList = wx.ListCtrl( sbSizer11.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
-        SizerList.Add( self.LayerList, 1, wx.ALL|wx.EXPAND, 5 )
+        self.m_scrolledWindow1 = wx.ScrolledWindow( sbSizer11.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.VSCROLL )
+        self.m_scrolledWindow1.SetScrollRate( 5, 5 )
+        bSizer12 = wx.BoxSizer( wx.VERTICAL )
 
-        bSizer27 = wx.BoxSizer( wx.HORIZONTAL )
+        bSizer13 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_staticText7 = wx.StaticText( sbSizer11.GetStaticBox(), wx.ID_ANY, u"Note:\nInner Layers only generated if present", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText7.Wrap( -1 )
+        self.m_staticText8 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"Layer Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText8.Wrap( -1 )
 
-        bSizer27.Add( self.m_staticText7, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+        bSizer13.Add( self.m_staticText8, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-        self.m_button17 = wx.Button( sbSizer11.GetStaticBox(), wx.ID_ANY, u"Edit Layer", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer27.Add( self.m_button17, 0, wx.ALL, 5 )
+        self.m_staticText9 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"Extension", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText9.Wrap( -1 )
+
+        bSizer13.Add( self.m_staticText9, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
 
-        SizerList.Add( bSizer27, 0, wx.ALL|wx.EXPAND, 5 )
+        bSizer12.Add( bSizer13, 0, wx.EXPAND, 5 )
+
+        self.LayerPanelArea = wx.Panel( self.m_scrolledWindow1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        bSizer12.Add( self.LayerPanelArea, 1, wx.EXPAND |wx.ALL, 5 )
+
+
+        self.m_scrolledWindow1.SetSizer( bSizer12 )
+        self.m_scrolledWindow1.Layout()
+        bSizer12.Fit( self.m_scrolledWindow1 )
+        SizerList.Add( self.m_scrolledWindow1, 1, wx.EXPAND |wx.ALL, 5 )
 
 
         sbSizer11.Add( SizerList, 1, wx.EXPAND, 5 )
@@ -192,20 +204,34 @@ class LayerSettingsPanelBase ( wx.Panel ):
         self.SetSizer( bSizer25 )
         self.Layout()
 
-        # Connect Events
-        self.LayerList.Bind( wx.EVT_LEFT_DOWN, self.OnLeftDown )
-        self.m_button17.Bind( wx.EVT_BUTTON, self.OnEditLayer )
-
     def __del__( self ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
-    def OnLeftDown( self, event ):
-        event.Skip()
+###########################################################################
+## Class LayerItemPanelBase
+###########################################################################
 
-    def OnEditLayer( self, event ):
-        event.Skip()
+class LayerItemPanelBase ( wx.Panel ):
+
+    def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
+        wx.Panel.__init__ ( self, parent, id = id, pos = pos, size = size, style = style, name = name )
+
+        bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.LayerEnabledCheckbox = wx.CheckBox( self, wx.ID_ANY, u"<Layer Name>", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer11.Add( self.LayerEnabledCheckbox, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.EXPAND, 5 )
+
+        self.Extension = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer11.Add( self.Extension, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+
+        self.SetSizer( bSizer11 )
+        self.Layout()
+        bSizer11.Fit( self )
+
+    def __del__( self ):
+        pass
 
 
 ###########################################################################

@@ -10,7 +10,7 @@ import logging
 
 from pcbnew import *
 from datetime import datetime
-from shutil import copy
+from shutil import move
 
 class Parser(object):
 
@@ -90,18 +90,22 @@ class Parser(object):
         popt.SetMirror(False)
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
-        layers_to_plot = [e for e in self.config.layers if e['enabled']]
+        layers_to_plot = [e for e in self.config.layers if e.enabled]
         
         # Create files and keep track of names
         for layer in layers_to_plot:
-            pctl.SetLayer(getattr(pcbnew,layer['layer']))
-            pctl.OpenPlotfile(layer['layer'], PLOT_FORMAT_GERBER, '')
+            pctl.SetLayer(layer.id)
+            pctl.OpenPlotfile(layer.id, PLOT_FORMAT_GERBER, layer.name)
             pctl.PlotLayer()
-            time.sleep(0.01)
             pctl.ClosePlot()
-            # Create a copy with same filename and Protel extensions.
+            
+            # rename
             srcPlot = pctl.GetPlotFileName()
-            self.generated_files += [srcPlot]
+            new_name = os.path.splitext(os.path.basename(self.file_name))[0] + layer.ext
+            new_name = os.path.join(os.path.dirname(srcPlot),new_name)
+            move(srcPlot, new_name)
+
+            self.generated_files += [new_name]
 
         # Fabricators need drill files.
         # sometimes a drill map file is asked (for verification purpose)

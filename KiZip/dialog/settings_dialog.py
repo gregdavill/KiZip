@@ -76,58 +76,34 @@ class LayerSettingsPanel(dialog_base.LayerSettingsPanelBase):
     def __init__(self, parent):
         dialog_base.LayerSettingsPanelBase.__init__(self, parent)
 
-        self.selected = []
-
-        # Add column
-        self.LayerList.InsertColumn(0, 'Layer (KiCad_ID)', width=150)
-        self.LayerList.InsertColumn(1, 'ext', width=150)
-
-        self.m_button17.Disable()
-
-        self.UpdateListSelections()
-
-    def OnEditLayer(self, event):
-        dlg = AddLayerDialog(None)
-        result = dlg.ShowModal()
-        print(result)
-
-    def Select(self, item):
-        if item in self.selected:
-            self.selected.remove(item)
-        else:
-            self.selected.append(item)
+        self.layers = []
+        self.bSizer = wx.BoxSizer( wx.VERTICAL )
+        self.LayerPanelArea.SetSizer(self.bSizer)
 
         
+    def AddLayer(self, enabled, name, ext):
+        # Create wx element and add to scroll box
+        pnl = LayerItemPanelBase(self.LayerPanelArea, enabled, name, ext)
+        self.bSizer.Add(pnl, 0, wx.EXPAND, 5 )
+        self.layers += [pnl]
 
-    def UpdateListSelections(self):
-        for d in range(self.LayerList.GetItemCount()):
-            self.LayerList.SetItemBackgroundColour(d, (-1, -1, -1, 255))
-            self.LayerList.SetItemState(d, 0, wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED | wx.LIST_STATE_PICKED)
-            if d in self.selected:
-                self.LayerList.SetItemBackgroundColour(d, 'Orange')
-            else:
-                ...
-        if self.LayerList.GetItemCount() > 0:
-            self.LayerList.RefreshItems(0, self.LayerList.GetItemCount()-1)
-
-    def OnLeftDown(self,event):
-        item, flags = self.LayerList.HitTest(event.GetPosition())
-        if flags & wx.LIST_HITTEST_ONITEM:
-            if item > -1:
-                self.Select(item)
-            else:
-                event.Skip()
-        self.UpdateListSelections()
-    
-
-    def OnMouse(self,event):
-        self.UpdateListSelections()
-        event.Skip()
 
 # Implementing LayerSettingsPanelBase
-class AddLayerDialog(dialog_base.AddLayerDialog):
-    def __init__(self, parent):
-        dialog_base.AddLayerDialog.__init__(self, parent)
+class LayerItemPanelBase(dialog_base.LayerItemPanelBase):
+    def __init__(self, parent, enabled, name, ext):
+        dialog_base.LayerItemPanelBase.__init__(self, parent)
+
+        self.LayerEnabledCheckbox.SetLabel(name)
+        self.LayerEnabledCheckbox.SetValue(enabled)
+        self.Extension.SetValue(ext)
+
+        self.name = name
+    
+    def IsEnabled(self):
+        return self.LayerEnabledCheckbox.IsChecked()
+
+    def GetExtension(self):
+        return self.Extension.GetValue()
 
 
         

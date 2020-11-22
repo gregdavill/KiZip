@@ -4,12 +4,22 @@ import argparse
 import os
 import re
 
+from collections import namedtuple
+import pcbnew
+
 from wx import FileConfig
 import wx
 
 from .. import dialog
 from .kicad import layer_names, layers_default
 
+
+class Layer:
+    def __init__(self, id, name, ext, enabled=False):
+        self.enabled = enabled
+        self.name = name
+        self.id = id
+        self.ext = ext
 
 class Config:
     FILE_NAME_FORMAT_HINT = (
@@ -39,8 +49,23 @@ class Config:
     output_name_format = '%f_gerber_%D_%T'
 
     # Layers
-    layers = [{'layer':l, 'ext':'', 'enabled': (l in layers_default)} for l in LAYER_NAMES]
-    
+    _default_layers = [
+        ( pcbnew.F_Cu, "Top layer", ".gtl"),
+        ( pcbnew.In1_Cu, "Inner Layer 1", ".g1"),
+        ( pcbnew.In2_Cu, "Inner Layer 2", ".g2"),
+        ( pcbnew.In3_Cu, "Inner Layer 3", ".g3"),
+        ( pcbnew.In4_Cu, "Inner Layer 4", ".g4"),
+        ( pcbnew.In5_Cu, "Inner Layer 5", ".g5"),
+        ( pcbnew.B_Cu, "Bottom layer", ".gbl"),
+        ( pcbnew.B_Mask, "Mask Bottom", ".gbs"),
+        ( pcbnew.F_Mask, "Mask top", ".gts"),
+        ( pcbnew.B_Paste, "Paste Bottom", ".gbp"),
+        ( pcbnew.F_Paste, "Paste Top", ".gtp"),
+        ( pcbnew.F_SilkS, "Silk Top", ".gto"),
+        ( pcbnew.B_SilkS, "Silk Bottom", ".gbo"),
+        ( pcbnew.Edge_Cuts, "Edges", ".gko"),
+    ]
+    layers = [Layer(*i, enabled=True) for i in _default_layers]
 
     @staticmethod
     def _split(s):
@@ -67,8 +92,9 @@ class Config:
 
         f.SetPath("/layers")
         for index in range(len(self.layers)):
-            d = self.layers[index]
-            d['enabled'] = f.ReadBool(f'{d["layer"]}_enabled', d['enabled'])
+            l = self.layers[index]
+            l.enabled = f.ReadBool(f'layer{l.id}_enabled', l.enabled)
+            l.ext = f.Read(f'layer{l.id}_ext', l.ext)
         
 
 
@@ -85,8 +111,9 @@ class Config:
 
         f.SetPath("/layers")
         for index in range(len(self.layers)):
-            d = self.layers[index]
-            f.WriteBool(f'{d["layer"]}_enabled',d['enabled'])
+            l = self.layers[index]
+            f.WriteBool(f'layer{l.id}_enabled',l.enabled)
+            f.Write(f'layer{l.id}_ext', l.ext)
         
         f.Flush()
 
@@ -101,15 +128,11 @@ class Config:
         for index in range(len(self.layers)):
             layer = self.layers[index]
 
-            #item.SetText(layer['layer'])
-            #dlg.layers.LayerList.InsertItem(item)
-            #dlg.layers.LayerList.SetItem(index,0,layer['layer'])
-            #dlg.layers.LayerList.SetItem(index,1,layer['ext'])
+            pnl = next(l for l in dlg.layers.layers if l.name is layer.name)
+            if pnl is not None:
+                layer.enabled = pnl.IsEnabled()
+                layer.ext = pnl.GetExtension()
 
-            if index in dlg.layers.selected:
-                layer['enabled'] = True
-            else:
-                layer['enabled'] = False
 
     def transfer_to_dialog(self, dlg):
         # type: (dialog.settings_dialog.SettingsDialogPanel) -> None
@@ -124,21 +147,8 @@ class Config:
         dlg.general.fileNameFormatTextControl.Value = self.output_name_format
 
         # Layers
-        for index in range(len(self.layers)):
-            layer = self.layers[index]
-
-            item = wx.ListItem()
-            item.SetId(index)
-
-            item.SetText(layer['layer'])
-            dlg.layers.LayerList.InsertItem(item)
-            dlg.layers.LayerList.SetItem(index,0,layer['layer'])
-            dlg.layers.LayerList.SetItem(index,1,layer['ext'])
-
-            if layer['enabled']:
-                dlg.layers.selected.append(index)
-
-        dlg.layers.UpdateListSelections()
+        for l in self.layers:
+            dlg.layers.AddLayer(l.enabled, l.name, l.ext)
 
 
     # noinspection PyTypeChecker
