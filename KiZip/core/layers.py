@@ -19,11 +19,11 @@ class DrillLayer(Layer):
 
 default_layers = [
     GerberLayer(pcbnew.F_Cu     ,'Top Copper', '.gtl', enabled=True),
-    GerberLayer(pcbnew.In1_Cu   ,'Inner1 Copper', '.g1', enabled=True),
-    GerberLayer(pcbnew.In2_Cu   ,'Inner2 Copper', '.g2', enabled=True),
-    GerberLayer(pcbnew.In3_Cu   ,'Inner3 Copper', '.g3', enabled=True),
-    GerberLayer(pcbnew.In4_Cu   ,'Inner4 Copper', 'g4', enabled=True),
-    GerberLayer(pcbnew.In5_Cu   ,'Inner5 Copper', '.g5', enabled=True),
+    GerberLayer(pcbnew.In1_Cu   ,'Inner1 Copper', '.g2', enabled=True),
+    GerberLayer(pcbnew.In2_Cu   ,'Inner2 Copper', '.g3', enabled=True),
+    GerberLayer(pcbnew.In3_Cu   ,'Inner3 Copper', '.g4'),
+    GerberLayer(pcbnew.In4_Cu   ,'Inner4 Copper', 'g5'),
+    GerberLayer(pcbnew.In5_Cu   ,'Inner5 Copper', '.g6'),
     GerberLayer(pcbnew.In6_Cu   ,'Inner6 Copper', ''),
     GerberLayer(pcbnew.In7_Cu   ,'Inner7 Copper', ''),
     GerberLayer(pcbnew.In8_Cu   ,'Inner8 Copper', ''),
@@ -64,5 +64,5 @@ default_layers = [
     GerberLayer(pcbnew.B_CrtYd  ,'Back CourtYard', ''),
     GerberLayer(pcbnew.F_Fab    ,'Top Fab', ''),
     GerberLayer(pcbnew.B_Fab    ,'Back Fab', ''),
-    DrillLayer( 9000, 'Drills', '.txt', enabled=True)
+    DrillLayer( 9000, 'Drills', '.drl', enabled=True)
 ]
