@@ -92,6 +92,12 @@ class Parser(object):
         popt.SetMirror(False)
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
+        if hasattr(popt, SetDisableGerberMacros):
+            popt.SetDisableGerberMacros(True)
+        if hasattr(popt, SetUseGerberX2format):
+            popt.SetUseGerberX2format(False)
+        
+
         # Fabricators need drill files.
         # sometimes a drill map file is asked (for verification purpose)
         drlwriter = EXCELLON_WRITER( self.board )
