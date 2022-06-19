@@ -112,6 +112,15 @@ def main(parser, config, logger):
     
     pcbdata = parser.parse()
 
+    # DRC Check!
+    drc_errors = parser.drc_check()
+    if len(drc_errors):
+        errors = ""
+        for e in drc_errors:
+            errors += "😭️ {0} {1}\n".format(*e)
+        wx.LogError("Unable to export! 😨️\n\n{0}".format(errors))
+        return
+
     file_list = parser.plot()
     logger.info(file_list)
     

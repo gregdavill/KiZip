@@ -1,6 +1,7 @@
 import os
 import tempfile
 import sys
+import re
 
 import pcbnew
 import time
@@ -57,6 +58,21 @@ class Parser(object):
 
         return pcbdata
 
+    def drc_check(self):
+        drc_file = "drc.txt"
+        pcbnew.WriteDRCReport(self.board, drc_file, pcbnew.GetUserUnits(), True)
+
+        # Count DRC Errors
+        matches = []
+        with open(drc_file, 'r') as f:
+            for l in f:
+                match = re.findall('^\*\* Found (\d+) (.+) \*\*', l)
+                if len(match):
+                    if match[0][0] != '0':
+                        matches += match
+
+        return matches
+
     def plot(self):
 
         self.temp_folder = tempfile.TemporaryDirectory(prefix="kizip")
@@ -92,9 +108,9 @@ class Parser(object):
         popt.SetMirror(False)
         popt.SetDrillMarksType(PCB_PLOT_PARAMS.NO_DRILL_SHAPE)
 
-        if hasattr(popt, SetDisableGerberMacros):
+        if hasattr(popt, 'SetDisableGerberMacros'):
             popt.SetDisableGerberMacros(True)
-        if hasattr(popt, SetUseGerberX2format):
+        if hasattr(popt, 'SetUseGerberX2format'):
             popt.SetUseGerberX2format(False)
         
 
